@@ -1,17 +1,19 @@
 import express, { Request, Response } from 'express';
 
+import {
+  getAllBooks,
+  getOneBook,
+  createNewBook,
+  editBook,
+  deleteBook
+} from '../controllers/book.controller'
+
 const router = express.Router();
 
-router.get('/books', [], (req: Request, res: Response) => {
-  return res.send('books get')
-})
-
-router.get('/book', [], (req: Request, res: Response) => {
-  return res.send('book get')
-})
-
-router.post('/book', (req:Request, res: Response) => {
-  return res.send('book post')
-})
+router.get('/books', getAllBooks)
+router.get('/book', getOneBook)
+router.post('/book', createNewBook)
+router.put('/book', editBook)
+router.delete('/book', deleteBook)
 
 export { router as Router };
