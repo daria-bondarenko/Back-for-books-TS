@@ -9,10 +9,6 @@ interface IBook {
   img: string;
 }
 
-interface bookModelInterface extends mongoose.Model<any>{
-  createBook(attr: IBook): any
-}
-
 const bookScheme = new mongoose.Schema({
   name: {
     type: String,
@@ -40,10 +36,6 @@ const bookScheme = new mongoose.Schema({
   }
 });
 
-bookScheme.statics.createBook = (attr: IBook) => {
-  return new Book (attr)
-}
+const Book = mongoose.model<IBook>('books', bookScheme);
 
-const Book = mongoose.model<any, bookModelInterface>('books', bookScheme);
-
-export { Book }
+export { Book, IBook }
