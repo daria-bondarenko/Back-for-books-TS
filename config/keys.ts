@@ -1,17 +1,18 @@
-import { Secret } from "jsonwebtoken";
+import { GetPublicKeyOrSecret, Secret } from "jsonwebtoken";
 
 require('dotenv').config();
 
+// @ts-ignore
 const jwtSecret: Secret = process.env.jwtSecret
 
 const access = {
-  type: 'access',
-  expiresIn: process.env.timeForAccessToken
+  sub: 'access',
+  exp: process.env.timeForAccessToken
 }
 
 const refresh = {
-  type: 'refresh',
-  expiresIn: process.env.timeForRefreshToken
+  sub: 'refresh',
+  exp: process.env.timeForRefreshToken
 }
 
 export {

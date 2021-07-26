@@ -1,28 +1,27 @@
-import uuid from 'uuid';
-import jwt from 'jsonwebtoken';
+import {v4 as uuid4} from 'uuid';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import { jwtSecret, access, refresh } from '../../../config/keys';
 import { Token, IToken } from '../../db/models/token';
-import { IUpdateTokens } from '../../../types/typesAndInterfaces'
+import { IUpdateTokens, IRefreshToken } from '../../../types/typesAndInterfaces'
 
 const generateAccessToken = (userId: string): string => {
-  const payload = {
-    userId,
-    type: access.type,
+  const payload: JwtPayload = {
+    aud: userId,
+    type: access.sub,
   };
-  const options = {expiresIn: access.expiresIn};
-
+  const options = {expiresIn: access.exp};
   return jwt.sign(payload, jwtSecret, options);
 };
 
-const generateRefreshToken = () => {
-  const payload = {
-    id: uuid.v4(),
-    type: refresh.type,
+const generateRefreshToken = (): IRefreshToken => {
+  const payload: JwtPayload = {
+    jti: uuid4(),
+    sub: refresh.sub,
   };
-  const options = {expiresIn: refresh.expiresIn};
+  const options = {expiresIn: refresh.exp};
 
-  return {
-    id: payload.id,
+  return <IRefreshToken>{
+    id: payload.jti,
     token: jwt.sign(payload, jwtSecret, options)
   };
 };
@@ -34,7 +33,7 @@ const replaceDbRefreshToken = async (tokenId: string, userId: string): Promise<v
 
 const updateTokens = async (userId: string): Promise<IUpdateTokens> => {
   const accessToken: string = generateAccessToken(userId);
-  const refreshToken: = generateRefreshToken();
+  const refreshToken: IRefreshToken = generateRefreshToken();
   await replaceDbRefreshToken(refreshToken.id, userId);
   return {
     accessToken,
