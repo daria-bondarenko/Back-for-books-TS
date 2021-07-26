@@ -3,6 +3,12 @@ interface IUpdateTokens {
   refreshToken: string
 }
 
+interface IRefreshToken {
+  id: string,
+  token: string
+}
+
 export {
-  IUpdateTokens
+  IUpdateTokens,
+  IRefreshToken
 }

@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import jwt from 'jsonwebtoken';
 import {jwtSecret} from '../config/keys';
 
-module.exports = (req: Request, res: Response, next: void): void => {
+module.exports = (req: Request, res: Response, next: any): void => {
   const authHeader: string | undefined = req.get('Authorization');
   if (!authHeader) {
     res.status(401).json({message: 'Токен где?'});
@@ -12,7 +12,7 @@ module.exports = (req: Request, res: Response, next: void): void => {
   const token = authHeader.replace('Bearer ', '');
   try {
     const payload = jwt.verify(token, jwtSecret);
-    if (payload.type !== 'access') {
+    if (payload && payload.sub !== 'access') {
       res.status(401).json({message: 'Невалидный токен'});
       return;
     }

@@ -46,18 +46,15 @@ const createNewBook = async (req: Request, res: Response): Promise<void> => {
 
 const editBook = async (req: Request, res: Response): Promise<void> => {
   try {
-    const {
-      params: {_id},
-      body,
-    } = req
-    const updateBook: IBook | null = await Book.findByIdAndUpdate( //зачем тут null
-      {_id: _id},
+    const {body} = req;
+    const {_id} = req.query;
+    await Book.findByIdAndUpdate(
+      {_id},
       body
     )
     const allBooks: IBook[] = await Book.find()
     res.status(200).json({
       message: "Book updated",
-      todo: updateBook,
       todos: allBooks,
     })
   } catch (error) {
@@ -67,13 +64,12 @@ const editBook = async (req: Request, res: Response): Promise<void> => {
 
 const deleteBook = async (req: Request, res: Response): Promise<void> => {
   try {
-    const deletedBook: IBook | null = await Book.findByIdAndRemove( //зачем тут null
+    await Book.findByIdAndRemove(
       req.params._id
     )
     const allBooks: IBook[] = await Book.find()
     res.status(200).json({
       message: "Book deleted",
-      todo: deletedBook,
       todos: allBooks,
     })
   } catch (error) {

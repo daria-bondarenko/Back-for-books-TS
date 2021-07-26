@@ -1,16 +1,16 @@
 import { Request, Response } from "express";
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload} from 'jsonwebtoken';
+import { Document } from 'mongoose';
 import { jwtSecret } from '../../../config/keys';
 import { updateTokens } from '../helpers/helpersFunction';
 import { Token, IToken } from "../../db/models/token";
-import { Document } from 'mongoose';
 
 const refreshTokens = async (req: Request, res: Response): Promise<void> => {
   const {refreshToken} = req.body;
-  let payload;
+  let payload: string | JwtPayload = jwt.verify(refreshToken, jwtSecret);
+
   try {
-    payload = jwt.verify(refreshToken, jwtSecret);
-    if (payload.type !== 'refresh') {
+    if (payload && payload.sub !== 'refresh') {
       res.status(400).json({message: 'Токен не подходит'});
       return;
     }
@@ -24,16 +24,18 @@ const refreshTokens = async (req: Request, res: Response): Promise<void> => {
     }
   }
 
-  const token: (IToken & Document<any, any, IToken>) | null = await Token.findOne({tokenId: payload.id}); // если переменная пустая, то код до сюда не дойдет
-  let tokens: { accessToken: string, refreshToken: string };
-  if (token === null) {
-    throw new Error('Невалидный токен');
-  } else {
-    tokens = await updateTokens(token.userId);
-    try {
-      res.json(tokens);
-    } catch (e) {
-      res.status(400).json({message: e.message})
+  if (typeof payload === 'object') {
+    const token: (IToken & Document<any, any, IToken>) | null = await Token.findOne({tokenId: payload.jti}); // на какое свойство из JwtPayload заменить id
+    let tokens: { accessToken: string, refreshToken: string };
+    if (token === null) {
+      throw new Error('Невалидный токен');
+    } else {
+      tokens = await updateTokens(token.userId);
+      try {
+        res.json(tokens);
+      } catch (e) {
+        res.status(400).json({message: e.message})
+      }
     }
   }
 }
